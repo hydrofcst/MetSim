@@ -120,7 +120,7 @@ def read_ascii(data_handle, domain=None,
     dates = date_range(start, stop, calendar=calendar)
     names = var_dict.keys()
     ds = pd.read_csv(data_handle, header=None, delim_whitespace=True,
-                     sep='\t', names=names).head(len(dates))
+                     names=names).head(len(dates))
     ds.index = dates
     return ds
 
@@ -140,13 +140,15 @@ def read_netcdf(data_handle, domain=None,
                      if k in list(ds.dims.keys())})
 
     if 'time' in ds.coords:
+        if isinstance(ds.indexes['time'], xr.CFTimeIndex):
+            ds['time'] = ds.indexes['time'].to_datetimeindex()
         ds['time'] = (ds.indexes['time'] -
                       pd.Timedelta('11H59M59S')).round('D')
 
     if var_dict is not None:
         var_list = list(var_dict.keys())
         ds = ds[var_list]
-        ds.rename(var_dict, inplace=True)
+        ds = ds.rename(var_dict)
 
     if start is not None or stop is not None:
         ds = ds.sel(time=slice(start, stop))
@@ -162,7 +164,7 @@ def read_data(data_handle, domain=None,
     """Read data directly from an xarray dataset"""
     varlist = list(data_handle.keys())
     if var_dict is not None:
-        data_handle.rename(var_dict, inplace=True)
+        data_handle = data_handle.rename(var_dict)
         varlist = list(var_dict.values())
     data_handle = data_handle[varlist]
 

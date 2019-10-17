@@ -13,7 +13,7 @@ for hydrologic modeling and climate applications.
 Metsim is based on MtClim_ and the preprocessor from version 4 of the
 VIC_ hydrologic model.
 
-.. _MtClim: http://www.ntsg.umt.edu/project/mtclim
+.. _MtClim: http://www.ntsg.umt.edu/project/mt-clim.php
 .. _VIC: https://github.com/UW-Hydro/VIC
 
 MetSim consists of 3 main modules that govern the operation of 3
@@ -105,7 +105,21 @@ in the configuration files see the `configuration <configuration.rst>`_ page.
 
 Once installed, MetSim can be used from the command line via:
 
-``ms /path/to/configuration [-v] [-n #]``
+.. code-block:: bash 
+ 
+    usage: ms [-h] [-n NUM_WORKERS] [-s SCHEDULER] [-v] [--version] config
+
+    positional arguments:
+    config                Input configuration file
+
+    optional arguments:
+    -h, --help            show this help message and exit
+    -n NUM_WORKERS, --num_workers NUM_WORKERS
+                            Parallel mode: number of processes to use
+    -s SCHEDULER, --scheduler SCHEDULER
+                            Dask scheduler to use
+    -v, --verbose         Increase the verbosity of MetSim
+    --version             Name and version number
 
 Bracketed flags are optional; ``-v`` activates verbose mode to print messages
 about the status of a run, and ``-n`` activates parallelism.  The number given

@@ -25,7 +25,7 @@ import logging
 import os
 import sys
 from collections import OrderedDict
-from configparser import SafeConfigParser
+from configparser import ConfigParser
 
 
 def _is_valid_file(parser, arg):
@@ -38,6 +38,7 @@ def _is_valid_file(parser, arg):
 
 def parse(args):
     """Parse the command line arguments"""
+    from metsim import __name__, __version__
     parser = argparse.ArgumentParser()
     parser.add_argument('config', type=lambda x: _is_valid_file(parser, x),
                         help='Input configuration file')
@@ -47,18 +48,21 @@ def parse(args):
                         help='Dask scheduler to use')
     parser.add_argument('-v', '--verbose', action='store_true',
                         help='Increase the verbosity of MetSim')
+    parser.add_argument('--version', action='version',
+                        version='{} {}'.format(__name__, __version__),
+                        help='Name and version number')
     return parser.parse_args()
 
 
 def init(opts):
     """Initialize some information based on the options & config"""
-    config = SafeConfigParser()
+    config = ConfigParser()
     config.optionxform = str
     config.read(opts.config)
     conf = OrderedDict(config['MetSim'])
 
     def invert_dict(d):
-        return OrderedDict({v: k for k, v in d.items()})
+        return OrderedDict([reversed(item) for item in d.items()])
 
     def to_list(s):
         return json.loads(s.replace("'", '"').split('#')[0])
@@ -69,6 +73,8 @@ def init(opts):
     conf['domain_vars'] = invert_dict(OrderedDict(config['domain_vars']))
     conf['state_vars'] = invert_dict(OrderedDict(config['state_vars']))
     conf['chunks'] = OrderedDict(config['chunks'])
+    if 'constant_vars' in config:
+        conf['constant_vars'] = OrderedDict(config['constant_vars'])
 
     # If the forcing variable is a directory, scan it for files
     if os.path.isdir(conf['forcing']):
